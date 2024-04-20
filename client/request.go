@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 )
 
 type TranslationRequest struct {
@@ -20,6 +21,12 @@ type TranslationResponse struct {
 }
 
 func SendRequest(language string, text []string) {
+	// Control if the user has the API key
+	if os.Getenv("DeepL-API-KEY") == "" {
+		fmt.Println("DeepL API key is not found. Consider to take a look at the GitHub repository of dictigo.")
+		os.Exit(1)
+	}
+
 	url := "https://api-free.deepl.com/v2/translate"
 	reqBody := TranslationRequest{
 		Text: text,
@@ -38,7 +45,7 @@ func SendRequest(language string, text []string) {
 		return
 	}
 
-	req.Header.Set("Authorization", "DeepL-Auth-Key [API KEY]")
+	req.Header.Set("Authorization", fmt.Sprintf(`DeepL-Auth-Key %s`,os.Getenv("DeepL-API-KEY")))
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
